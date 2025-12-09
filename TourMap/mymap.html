@@ -1,0 +1,152 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+	<meta charset="UTF-8">
+	<meta name="viewport" content="width=device-width, initial-scale=1.0">
+	<title>TourMap</title>
+
+	<link rel="stylesheet" href="styles.css"> 
+
+	<link rel="stylesheet" type="text/css" href="https://cdnjs.cloudflare.com/ajax/libs/leaflet/1.9.4/leaflet.css">
+	<link rel="stylesheet" href="https://maxcdn.bootstrapcdn.com/bootstrap/3.4.1/css/bootstrap.min.css">
+	<link rel="stylesheet" href="source/jquery-ui.min.css">
+	<link rel="stylesheet" href="plugins/sidebar/L.Control.Sidebar.css">
+	<link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/leaflet-easybutton@2/src/easy-button.css">
+	<link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/7.0.1/css/all.min.css">
+	<link rel="stylesheet" href="https://ppete2.github.io/Leaflet.PolylineMeasure/Leaflet.PolylineMeasure.css" />
+	<link rel="stylesheet" href="plugins/mouseposition/L.Control.MousePosition.css">
+	<link rel="stylesheet" href="https://unpkg.com/@geoman-io/leaflet-geoman-free@latest/dist/leaflet-geoman.css"/>
+	<link rel="stylesheet" href="plugins/minimap/Control.MiniMap.min.css">
+
+
+
+	<script src="https://cdnjs.cloudflare.com/ajax/libs/leaflet/1.9.4/leaflet.js"></script>
+	<script src="https://cdnjs.cloudflare.com/ajax/libs/leaflet/1.9.4/leaflet-src.js"></script>
+	<script src="https://cdnjs.cloudflare.com/ajax/libs/jquery/3.7.1/jquery.js"></script>
+	<script src="source/jquery-ui.min.js"></script>
+	<script src="plugins/sidebar/L.Control.Sidebar.js"></script>
+	<script src="https://cdn.jsdelivr.net/npm/leaflet-easybutton@2/src/easy-button.js"></script>
+	<script src="https://ppete2.github.io/Leaflet.PolylineMeasure/Leaflet.PolylineMeasure.js"></script>
+	<script src="plugins/mouseposition/L.Control.MousePosition.js"></script>
+	<script src="https://unpkg.com/@geoman-io/leaflet-geoman-free@latest/dist/leaflet-geoman.js"></script>
+	<script src="plugins/minimap/Control.MiniMap.min.js"></script>
+	<script src="plugins/ajax/leaflet.ajax.js"></script>
+
+</head>
+<body>
+
+	<div id ="sidebar" class="col-md-3"></div>
+	<div id ="mapdiv"  class="col-md-12"></div>
+
+	<script>
+
+		var mymap;
+		var baseLayers;
+		var overlays;
+
+
+		
+		mymap = L.map('mapdiv', {
+    		center: [13.094868338797733, 80.27843222946677],
+    		zoom: 13,
+    		attributionControl: false,
+    		zoomControl: false
+   		});
+
+		var GoogleStreets = L.tileLayer('http://{s}.google.com/vt/lyrs=m&x={x}&y={y}&z={z}',{
+				                maxZoom: 23,
+				                subdomains:['mt0','mt1','mt2','mt3']
+				                });
+
+		var openStreetMap = L.tileLayer('https://tile.openstreetmap.org/{z}/{x}/{y}.png?',{maxZoom:23});   
+
+		var CartoDB_Positron = L.tileLayer('https://{s}.basemaps.cartocdn.com/light_all/{z}/{x}/{y}{r}.png', {maxZoom: 23}); 
+		
+		var Esri_WorldImagery = L.tileLayer('https://server.arcgisonline.com/ArcGIS/rest/services/World_Imagery/MapServer/tile/{z}/{y}/{x}', {maxZoom:23});          
+
+		var Esri_WorldImagery_minimap = L.tileLayer('https://server.arcgisonline.com/ArcGIS/rest/services/World_Imagery/MapServer/tile/{z}/{y}/{x}', {maxZoom:23});
+
+		var opentopomap = L.tileLayer('https://{s}.tile.opentopomap.org/{z}/{x}/{y}.png', {
+            maxZoom: 23
+        });
+
+
+		GoogleStreets.addTo(mymap);
+
+		//Side Bar 
+
+		var sidebar = L.control.sidebar('sidebar', {
+    		position: 'left'
+		});
+
+		mymap.addControl(sidebar);
+
+		var helloPopup = L.popup().setContent('Hello World!');
+
+		//EASY BUTTON
+
+
+		L.easyButton('glyphicon-transfer', function(btn, map){
+    	// Toggle sidebar visibility
+		sidebar.toggle();
+		}).addTo(mymap);
+
+		//SCALE
+		L.control.scale({position:'bottomleft', maxWidth:'200'}).addTo(mymap);
+
+
+		//ZOOM CONTROL 
+
+		L.control.zoom({position:'topright'}).addTo(mymap);
+
+		//POLYLINE MEASTUREMENT
+		L.control.polylineMeasure({position:'topright'}).addTo(mymap);
+
+
+		//MousePosition
+		L.control.mousePosition({position:'bottomright'}).addTo(mymap);
+
+		//ADD GEOMAN TOOLBAR
+		// add Leaflet-Geoman controls with some options to the map  
+		
+		mymap.pm.addControls({  
+  			position: 'topleft',  
+  			drawCircleMarker: false,
+  			rotateMode: false,
+		}); 
+
+
+		//Event log
+
+		mymap.on("pm:create", function(e){
+			console.log(e)});
+
+		var MiniMap = new L.Control.MiniMap(Esri_WorldImagery_minimap, {position:'bottomright', 
+			hieght:150, 
+		    width: 150
+		}).addTo(mymap);
+
+
+		//ADDLAYERS 
+
+		 baseLayers = {
+    		"Google Streets":GoogleStreets,
+    		"OSM":openStreetMap,
+    		"CartoDB":CartoDB_Positron,
+    		"EsriWorldImagery":Esri_WorldImagery,
+    		"Open Topo Map": opentopomap
+		 };
+
+ 
+		var control_layers = L.control.layers(baseLayers,overlays).addTo(mymap);
+
+		//DATA LOADING 
+
+		
+
+
+	</script>
+                                                                                                                                                                                 pt
+</body>
+</html>
+	

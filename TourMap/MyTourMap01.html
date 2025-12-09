@@ -1,0 +1,267 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+	<meta charset="UTF-8">
+	<meta name="viewport" content="width=device-width, initial-scale=1.0">
+	<title>TourMap</title>
+
+	<link rel="stylesheet" href="styles.css">
+
+	<link rel="stylesheet" type="text/css" href="https://cdnjs.cloudflare.com/ajax/libs/leaflet/1.9.4/leaflet.css">
+	<link rel="stylesheet" href="https://maxcdn.bootstrapcdn.com/bootstrap/3.4.1/css/bootstrap.min.css">
+	<link rel="stylesheet" href="source/jquery-ui.min.css">
+	<link rel="stylesheet" href="plugins/sidebar/L.Control.Sidebar.css">
+	<link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/leaflet-easybutton@2/src/easy-button.css">
+	<link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/7.0.1/css/all.min.css">
+	<link rel="stylesheet" href="https://ppete2.github.io/Leaflet.PolylineMeasure/Leaflet.PolylineMeasure.css" />
+	<link rel="stylesheet" href="plugins/mouseposition/L.Control.MousePosition.css">
+	<link rel="stylesheet" href="https://unpkg.com/@geoman-io/leaflet-geoman-free@latest/dist/leaflet-geoman.css"/>
+	<link rel="stylesheet" href="plugins/minimap/Control.MiniMap.min.css">
+
+	<link rel="stylesheet" href="https://unpkg.com/leaflet-routing-machine@latest/dist/leaflet-routing-machine.css" />
+
+	<script src="https://cdnjs.cloudflare.com/ajax/libs/leaflet/1.9.4/leaflet.js"></script>
+	<script src="https://cdnjs.cloudflare.com/ajax/libs/leaflet/1.9.4/leaflet-src.js"></script>
+	<script src="https://cdnjs.cloudflare.com/ajax/libs/jquery/3.7.1/jquery.js"></script>
+	<script src="source/jquery-ui.min.js"></script>
+	<script src="plugins/sidebar/L.Control.Sidebar.js"></script>
+	<script src="https://cdn.jsdelivr.net/npm/leaflet-easybutton@2/src/easy-button.js"></script>
+	<script src="https://ppete2.github.io/Leaflet.PolylineMeasure/Leaflet.PolylineMeasure.js"></script>
+	<script src="plugins/mouseposition/L.Control.MousePosition.js"></script>
+	<script src="https://unpkg.com/@geoman-io/leaflet-geoman-free@latest/dist/leaflet-geoman.js"></script>
+	<script src="plugins/minimap/Control.MiniMap.min.js"></script>
+	<script src="plugins/ajax/leaflet.ajax.js"></script>
+
+	<script src="https://unpkg.com/leaflet-routing-machine@latest/dist/leaflet-routing-machine.js"></script>
+
+</head>
+<body>
+
+	<div id ="sidebar" class="col-md-3"></div>
+	<div id ="mapdiv" class="col-md-12"></div>
+
+	<script>
+		var mymap;
+		var baseLayers;
+		var overlays;
+
+		mymap = L.map('mapdiv', {
+    		center: [17.5, 74.5],
+    		zoom: 7,
+    		attributionControl: false,
+    		zoomControl: false
+		});
+
+		var GoogleStreets = L.tileLayer('http://{s}.google.com/vt/lyrs=m&x={x}&y={y}&z={z}',{
+				maxZoom: 23,
+				subdomains:['mt0','mt1','mt2','mt3']
+				});
+
+		var openStreetMap = L.tileLayer('https://tile.openstreetmap.org/{z}/{x}/{y}.png?',{maxZoom:23});
+
+		var CartoDB_Positron = L.tileLayer('https://{s}.basemaps.cartocdn.com/light_all/{z}/{x}/{y}{r}.png', {maxZoom: 23});
+
+		var Esri_WorldImagery = L.tileLayer('https://server.arcgisonline.com/ArcGIS/rest/services/World_Imagery/MapServer/tile/{z}/{y}/{x}', {maxZoom:23});
+
+		var Esri_WorldImagery_minimap = L.tileLayer('https://server.arcgisonline.com/ArcGIS/rest/services/World_Imagery/MapServer/tile/{z}/{y}/{x}', {maxZoom:23});
+
+		var opentopomap = L.tileLayer('https://{s}.tile.opentopomap.org/{z}/{x}/{y}.png', {
+    		maxZoom: 23
+    	});
+
+
+		GoogleStreets.addTo(mymap);
+
+		// Side Bar
+		var sidebar = L.control.sidebar('sidebar', {
+    		position: 'left'
+		});
+		mymap.addControl(sidebar);
+
+		// EASY BUTTON
+		L.easyButton('glyphicon-transfer', function(btn, map){
+    		sidebar.toggle();
+		}).addTo(mymap);
+
+		// SCALE
+		L.control.scale({position:'bottomleft', maxWidth:'200'}).addTo(mymap);
+
+		// ZOOM CONTROL
+		L.control.zoom({position:'topright'}).addTo(mymap);
+
+		// POLYLINE MEASTUREMENT
+		L.control.polylineMeasure({position:'topright'}).addTo(mymap);
+
+		// MousePosition
+		L.control.mousePosition({position:'bottomright'}).addTo(mymap);
+
+		// ADD GEOMAN TOOLBAR
+		mymap.pm.addControls({
+    		position: 'topleft',
+    		drawCircleMarker: false,
+    		rotateMode: false,
+		});
+
+		// Event log
+		mymap.on("pm:create", function(e){
+			console.log(e)
+		});
+
+		var MiniMap = new L.Control.MiniMap(Esri_WorldImagery_minimap, {position:'bottomright',
+			hieght:150,
+    		width: 150
+		}).addTo(mymap);
+
+
+		// =================================================================
+		// RAILWAY DATA STYLING (For general GeoJSON data)
+		// =================================================================
+
+		function style_railway_lines(json) {
+			return {
+				color: '#0000FF',
+				weight: 4,
+				opacity: 0.7
+			};
+		}
+
+		function style_stations(json,latlng){
+			var att = json.properties;
+			return L.marker(latlng);
+		}
+
+		// GENERAL RAILWAY LAYERS (Optional, based on your GeoJSON files)
+		var stations = L.geoJSON.ajax('data/TourRailway_Stations.geojson', {pointToLayer:style_stations}).addTo(mymap);
+		var railwayLines = L.geoJSON.ajax('data/TourRailwayLines.geojson', {style: style_railway_lines});
+
+
+		// =================================================================
+		// SPECIFIC ROUTE WAYPOINTS DEFINITION
+		// =================================================================
+
+		// Pune Junction's precise coordinate from GeoJSON
+		var pune = L.latLng(18.52907165, 73.86656767);
+
+		// --- 1. ROAD ROUTE WAYPOINTS: Pune -> Lonavala -> Mumbai -> Goa ---
+		var lonavala = L.latLng(18.7563, 73.4079);
+		var mumbai = L.latLng(19.0760, 72.8777);
+		var goa = L.latLng(15.4967, 73.8278);
+		var roadWaypoints = [pune, lonavala, mumbai, goa];
+
+
+		// --- 2. RAIL ROUTE WAYPOINTS: Chennai to Pune (Using ALL station coordinates from GeoJSON) ---
+		var chennaiPuneWaypoints = [
+		    L.latLng(13.08563362, 80.27391883),  // Chennai Central Jn. [cite: 1]
+		    L.latLng(13.11643796, 79.91160354),  // Thiruvallur Jn. [cite: 2]
+		    L.latLng(13.08260008, 79.66851747),  // Arakonam Jn. [cite: 2]
+		    L.latLng(13.18006968, 79.61189523),  // Thiruttani Jn. [cite: 2]
+		    L.latLng(13.44115392, 79.55251558),  // Puttur, AP [cite: 3]
+		    L.latLng(13.63799971, 79.50634033),  // Renigunta Jn. [cite: 3]
+		    L.latLng(13.94868854, 79.34649589),  // Koduru [cite: 4]
+		    L.latLng(14.18562269, 79.15246923),  // Razampeta [cite: 4]
+		    L.latLng(14.45193104, 78.82919654),  // Cuddppa - Kadappa [cite: 5]
+		    L.latLng(14.64407034, 78.53321077),  // Yerraguntla Jn. [cite: 5]
+		    L.latLng(14.90957842, 77.97523822),  // Tadiapatri [cite: 6]
+		    L.latLng(15.15002315, 77.62451083),  // Gooty [cite: 6]
+		    L.latLng(15.17531781, 77.36829152),  // Guntakal Jn. [cite: 7]
+		    L.latLng(15.61801482, 77.27473642),  // Adoni [cite: 7]
+		    L.latLng(15.94478717, 77.29816959),  // Manthralayam Road [cite: 7]
+		    L.latLng(16.19246812, 77.33959662),  // Raichur Jn. [cite: 8]
+		    L.latLng(16.41030535, 77.32870351),  // Krishna [cite: 8]
+		    L.latLng(16.74217716, 77.13149549),  // Yadgir [cite: 9]
+		    L.latLng(17.05289862, 76.99203370),  // Wadi [cite: 9]
+		    L.latLng(17.31510299, 76.82612472),  // Kalaburgi (Gulbarga) [cite: 10]
+		    L.latLng(17.66487943, 75.89345073),  // Solapur Jn. [cite: 10]
+		    L.latLng(18.09245462, 75.41704318),  // Kurduvadi [cite: 11]
+		    L.latLng(18.46413408, 74.57924093),  // Daund Jn. [cite: 11]
+		    pune                                  // Pune Jn. [cite: 11]
+		];
+
+
+		// =================================================================
+		// L.Routing.control INITIALIZATION
+		// =================================================================
+
+		var roadRouteControl = L.Routing.control({
+			waypoints: roadWaypoints,
+			routeWhileDragging: false,
+			show: true,
+			addWaypoints: false,
+			draggableWaypoints: false,
+			fitSelectedRoutes: false,
+			router: L.Routing.osrmv1(),
+			lineOptions: {
+				styles: [{ color: 'red', opacity: 0.9, weight: 5 }]
+			}
+		});
+		var roadRouteLayer = L.layerGroup();
+
+
+		var railRouteControl = L.Routing.control({
+			waypoints: chennaiPuneWaypoints, // Use the detailed station array
+			routeWhileDragging: false,
+			show: true,
+			addWaypoints: false,
+			draggableWaypoints: false,
+			fitSelectedRoutes: false,
+			router: L.Routing.osrmv1(),
+			lineOptions: {
+				styles: [{ color: 'purple', opacity: 0.8, weight: 6, dashArray: '10, 10' }]
+			}
+		});
+		var railRouteLayer = L.layerGroup();
+
+
+		// =================================================================
+		// LAYER VISIBILITY MANAGEMENT
+		// =================================================================
+
+		// Initially, remove both route controls from the map
+		roadRouteControl.remove();
+		railRouteControl.remove();
+
+		// Listen for when a layer is ADDED (checked in layer control)
+		mymap.on('overlayadd', function(e) {
+			if (e.layer === roadRouteLayer) {
+				roadRouteControl.addTo(mymap);
+			}
+			if (e.layer === railRouteLayer) {
+				railRouteControl.addTo(mymap);
+			}
+		});
+
+		// Listen for when a layer is REMOVED (unchecked in layer control)
+		mymap.on('overlayremove', function(e) {
+			if (e.layer === roadRouteLayer) {
+				roadRouteControl.remove();
+			}
+			if (e.layer === railRouteLayer) {
+				railRouteControl.remove();
+			}
+		});
+
+
+		// =================================================================
+		// UPDATE LAYER CONTROL
+		// =================================================================
+
+		baseLayers = {
+    		"Google Streets":GoogleStreets,
+    		"OSM":openStreetMap,
+    		"CartoDB":CartoDB_Positron,
+    		"EsriWorldImagery":Esri_WorldImagery,
+    		"Open Topo Map": opentopomap
+		};
+
+		overlays = {
+			"General Railway Stations": stations,
+			"General Railway Lines": railwayLines,
+			"Road Route (Pune-Goa)": roadRouteLayer,
+			"Rail Route (Chennai-Pune)": railRouteLayer
+		};
+
+		var control_layers = L.control.layers(baseLayers, overlays).addTo(mymap);
+
+	</script>
+</body>
+</html>

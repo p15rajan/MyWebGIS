@@ -1,0 +1,28 @@
+table {
+	font-family: sans-serif;
+	width: 100%;
+	border-collapse: collapse; 
+}
+
+th, td {
+	border: 1px solid black
+
+}
+
+tr:hover{
+	background-color: green
+}
+
+#element1{
+	color:blue;
+}
+
+#element2{
+	
+	color:purple;
+}
+
+.ordered_list{
+
+	color:darkred;
+}

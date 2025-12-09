@@ -1,0 +1,227 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+	<meta charset="UTF-8">
+	<meta name="viewport" content="width=device-width, initial-scale=1.0">
+	<title>TourMap</title>
+
+	<link rel="stylesheet" href="styles.css">
+
+	<link rel="stylesheet" type="text/css" href="https://cdnjs.cloudflare.com/ajax/libs/leaflet/1.9.4/leaflet.css">
+	<link rel="stylesheet" href="https://maxcdn.bootstrapcdn.com/bootstrap/3.4.1/css/bootstrap.min.css">
+	<link rel="stylesheet" href="source/jquery-ui.min.css">
+	<link rel="stylesheet" href="plugins/sidebar/L.Control.Sidebar.css">
+	<link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/leaflet-easybutton@2/src/easy-button.css">
+	<link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/7.0.1/css/all.min.css">
+	<link rel="stylesheet" href="https://ppete2.github.io/Leaflet.PolylineMeasure/Leaflet.PolylineMeasure.css" />
+	<link rel="stylesheet" href="plugins/mouseposition/L.Control.MousePosition.css">
+	<link rel="stylesheet" href="https://unpkg.com/@geoman-io/leaflet-geoman-free@latest/dist/leaflet-geoman.css"/>
+	<link rel="stylesheet" href="plugins/minimap/Control.MiniMap.min.css">
+
+	<link rel="stylesheet" href="https://unpkg.com/leaflet-routing-machine@latest/dist/leaflet-routing-machine.css" />
+
+	<script src="https://cdnjs.cloudflare.com/ajax/libs/leaflet/1.9.4/leaflet.js"></script>
+	<script src="https://cdnjs.cloudflare.com/ajax/libs/leaflet/1.9.4/leaflet-src.js"></script>
+	<script src="https://cdnjs.cloudflare.com/ajax/libs/jquery/3.7.1/jquery.js"></script>
+	<script src="source/jquery-ui.min.js"></script>
+	<script src="plugins/sidebar/L.Control.Sidebar.js"></script>
+	<script src="https://cdn.jsdelivr.net/npm/leaflet-easybutton@2/src/easy-button.js"></script>
+	<script src="https://ppete2.github.io/Leaflet.PolylineMeasure/Leaflet.PolylineMeasure.js"></script>
+	<script src="plugins/mouseposition/L.Control.MousePosition.js"></script>
+	<script src="https://unpkg.com/@geoman-io/leaflet-geoman-free@latest/dist/leaflet-geoman.js"></script>
+	<script src="plugins/minimap/Control.MiniMap.min.js"></script>
+	<script src="plugins/ajax/leaflet.ajax.js"></script>
+
+	<script src="https://unpkg.com/leaflet-routing-machine@latest/dist/leaflet-routing-machine.js"></script>
+
+</head>
+<body>
+
+	<div id ="sidebar" class="col-md-3"></div>
+	<div id ="mapdiv" class="col-md-12"></div>
+
+	<script>
+		var mymap;
+		var baseLayers;
+		var overlays;
+
+		mymap = L.map('mapdiv', {
+    		center: [17.5, 75.0], // Centered between Pune/Mumbai/Goa for better initial view
+    		zoom: 7, // Zoom out to see the route
+    		attributionControl: false,
+    		zoomControl: false
+		});
+
+		var GoogleStreets = L.tileLayer('http://{s}.google.com/vt/lyrs=m&x={x}&y={y}&z={z}',{
+				maxZoom: 23,
+				subdomains:['mt0','mt1','mt2','mt3']
+				});
+
+		var openStreetMap = L.tileLayer('https://tile.openstreetmap.org/{z}/{x}/{y}.png?',{maxZoom:23});
+
+		var CartoDB_Positron = L.tileLayer('https://{s}.basemaps.cartocdn.com/light_all/{z}/{x}/{y}{r}.png', {maxZoom: 23});
+
+		var Esri_WorldImagery = L.tileLayer('https://server.arcgisonline.com/ArcGIS/rest/services/World_Imagery/MapServer/tile/{z}/{y}/{x}', {maxZoom:23});
+
+		var Esri_WorldImagery_minimap = L.tileLayer('https://server.arcgisonline.com/ArcGIS/rest/services/World_Imagery/MapServer/tile/{z}/{y}/{x}', {maxZoom:23});
+
+		var opentopomap = L.tileLayer('https://{s}.tile.opentopomap.org/{z}/{x}/{y}.png', {
+    		maxZoom: 23
+    	});
+
+
+		GoogleStreets.addTo(mymap);
+
+		// Side Bar
+		var sidebar = L.control.sidebar('sidebar', {
+    		position: 'left'
+		});
+		mymap.addControl(sidebar);
+
+		// EASY BUTTON
+		L.easyButton('glyphicon-transfer', function(btn, map){
+    		sidebar.toggle();
+		}).addTo(mymap);
+
+		// SCALE
+		L.control.scale({position:'bottomleft', maxWidth:'200'}).addTo(mymap);
+
+		// ZOOM CONTROL
+		L.control.zoom({position:'topright'}).addTo(mymap);
+
+		// POLYLINE MEASTUREMENT
+		L.control.polylineMeasure({position:'topright'}).addTo(mymap);
+
+		// MousePosition
+		L.control.mousePosition({position:'bottomright'}).addTo(mymap);
+
+		// ADD GEOMAN TOOLBAR
+		mymap.pm.addControls({
+    		position: 'topleft',
+    		drawCircleMarker: false,
+    		rotateMode: false,
+		});
+
+		// Event log
+		mymap.on("pm:create", function(e){
+			console.log(e)
+		});
+
+		var MiniMap = new L.Control.MiniMap(Esri_WorldImagery_minimap, {position:'bottomright',
+			hieght:150,
+    		width: 150
+		}).addTo(mymap);
+
+
+		// =================================================================
+		// NEW: PUNE TO MUMBAI TO GOA ROUTING
+		// =================================================================
+
+		var pune = L.latLng(18.5204, 73.8567);
+		var mumbai = L.latLng(19.0760, 72.8777);
+		var goa = L.latLng(15.4967, 73.8278);
+
+		L.Routing.control({
+			waypoints: [
+				pune,
+				mumbai,
+				goa
+			],
+			routeWhileDragging: true, // Recalculate route if markers are dragged
+			show: true, // Show the instructions panel
+			position: 'topleft', // Position the routing control instructions
+			// Uses the default Open Source Routing Machine (OSRM) service
+			router: L.Routing.osrmv1(),
+			fitSelectedRoutes: true // Automatically zoom/pan map to the route
+		}).addTo(mymap);
+
+		// =================================================================
+		// DATA LOADING AND STYLING FOR OVERLAY LAYERS (Fixed structure)
+		// =================================================================
+
+		// --- STYLE FUNCTIONS ---
+		function style_admin(feature) {
+			return {
+				fillColor: '#EBEBEB',
+				weight: 2,
+				opacity: 1,
+				color: '#444444',
+				fillOpacity: 0.4
+			};
+		}
+
+		function style_road_network(json) {
+			return {
+				color: '#FF0000',
+				weight: 3,
+				opacity: 0.8
+			};
+		}
+
+		function style_railway_lines(json) {
+			return {
+				color: '#0000FF',
+				weight: 4,
+				opacity: 0.7
+			};
+		}
+
+		function style_stations(json,latlng){
+			var att = json.properties;
+			// Returning a default marker
+			return L.marker(latlng);
+		}
+
+
+		// --- LAYER DEFINITIONS ---
+
+		// Admin Boundaries (using the file path from your previous attempt)
+		var adminLayer = L.geoJSON.ajax('data/UNOM_RoadNetwork_States.geojson', {
+			style: style_admin,
+			onEachFeature: function (feature, layer) {
+				if (feature.properties && feature.properties.NAME_1) {
+					layer.bindPopup('State: ' + feature.properties.NAME_1);
+				}
+			}
+		});
+
+		// Road Network (using the file path from your previous attempt)
+		var roadNetwork = L.geoJSON.ajax('data/UNOM_RoadNetwork.geojson', {
+			style: style_road_network
+		});
+
+		// Railway Stations (added to map)
+		var stations = L.geoJSON.ajax('data/TourRailway_Stations.geojson', {pointToLayer:style_stations}).addTo(mymap);
+
+		// Railway Lines
+		var railwayLines = L.geoJSON.ajax('data/TourRailwayLines.geojson', {
+			style: style_railway_lines
+		});
+
+
+		// =================================================================
+		// LAYER CONTROL
+		// =================================================================
+
+		baseLayers = {
+    		"Google Streets":GoogleStreets,
+    		"OSM":openStreetMap,
+    		"CartoDB":CartoDB_Positron,
+    		"EsriWorldImagery":Esri_WorldImagery,
+    		"Open Topo Map": opentopomap
+		};
+
+		// Define all your overlay layers here
+		overlays = {
+			"Railway Stations": stations,
+			"Railway Lines": railwayLines,
+			"Admin Boundaries (State)": adminLayer,
+			"Local Road Network": roadNetwork
+		};
+
+		// Pass the populated 'overlays' object to the layer control
+		var control_layers = L.control.layers(baseLayers, overlays).addTo(mymap);
+
+	</script>
+</body>
+</html> 

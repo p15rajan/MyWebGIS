@@ -1,0 +1,193 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+	<meta charset="UTF-8">
+	<meta name="viewport" content="width=device-width, initial-scale=1.0">
+	<title>Document</title>
+</head>
+<body>
+	
+<script>
+	
+	// OUTPUT OR CONSOL log
+	console.log("Hello World!");
+
+	//VARIABLES 
+	 //STRINGS
+
+	 var first_name = 'Packiarajan';
+	 var last_name =  'Siva'
+	 var email = "p15rajan@gmail.com"
+
+	 console.log(first_name);
+	 console.log(last_name);
+
+	 //Text Consolidation
+	 console.log("My First Name " + first_name +  "  You can reach me at   " + email);
+
+	 var age = 60
+	 var height = 165
+
+	 console.log("Type of First name  " + typeof first_name);
+
+	 //boolean
+	 var isStudent = false;
+	 console.log("Is Student type   "  + typeof isStudent);
+
+
+	 // Arrays
+
+	 var colors	 = ['red', 'green', 'blue', 'yellow'];
+     var frutis =  ['Apple', 'Orange', 'Grapes', 'Banana'];
+
+     var collection = [
+     ['red', 'green', 'blue', 'yellow'],
+     ['Apple', 'Orange', 'Grapes', 'Banana']
+     ];
+     
+     console.log(colors);
+     console.log(collection)
+
+     //OBJECT 
+
+     var Personal_information = {
+     	first_name: 'Packiarajan',
+     	last_name: 'Siva',
+    	email: 'p15rajan@gmail.com',
+    	age: 60 ,
+    	colors: ['red', 'green', 'blue', 'yellow'],
+    	collection: [
+     ['red', 'green', 'blue', 'yellow'],
+     ['Apple', 'Orange', 'Grapes', 'Banana']
+     ]
+     }
+     console.log(Personal_information);
+     console.log("Type of Personal Information  " + typeof Personal_information);
+
+     //JOB
+     var job = null;
+     console.log(job);
+     console.log("Type of Job " + typeof job);
+
+     //UNDEFINED
+     var Salary; 
+     console.log(Salary);
+     console.log("Type of Salary    " + typeof Salary);
+
+
+    //ARITHMETIC OPERATIONS
+
+    var a = 10 
+    var b = 20 
+    console.log("Sum  "+(a+b));
+    console.log("Subtract  "+(b-a));
+    console.log("Multiply "+(a*b));
+    console.log("Divide  " +(b/a));
+
+
+    console.log(colors[2]);
+    console.log(collection[1][1]);
+
+
+    console.log(Personal_information.first_name);
+    console.log(Personal_information.collection[1][2]);
+
+   //LOOP
+
+   for (var i = 1; i <=5 ; i++){
+   	console.log("Itertion:  " +i)
+   }
+
+   var j = 1 ;
+    while (j < 5) {
+    console.log(j);
+    	j = j + 1;
+	}
+
+	console.log(colors)
+
+	for (var i =0 ; i< colors.length; i++) {
+		console.log(colors[i]);
+	}
+
+    //CONDITIONAL STATEMENTS
+    var age = 40;
+
+    if (age >= 60) {
+    	console.log("You are a Senior Citizen");
+    }
+    	else {
+    		console.log("You are not a Senior Citizen");
+    	}
+    
+    var score = 60;
+    var grade;
+    
+    if (score > 90) {
+    	grade = "A+";
+        } else if (score >=80) {
+        		grade = "A";
+        } else if (score >= 70) {
+        	grade = "B+"
+        } else grade = "B"; {
+        	console.log(grade);
+        }
+
+
+       //SWITCH 
+
+       var day = 4;
+       var day_name;
+
+       switch (day) {
+       	case 1: 
+       		day_name = 'Monday';
+       		break;
+       	case 2: 
+       		day_name = 'Tuesday';
+       		break;
+       	case 3: 
+       		day_name = 'Wednesday';
+       		break;
+       	case 4: 
+       		day_name = 'Thursday';
+       		break;
+       	case 5: 
+       		day_name = 'Friday';
+       		break;
+       	case 6: 
+       		day_name = 'Saturday';
+       		break;
+       	case 7: 
+       		day_name = 'Sunday';
+      		break;
+       	default:
+       		day_name = "Error";
+       		break;
+       		      		
+       		
+       }
+
+       console.log(day_name);
+
+       //FUNCTIONS
+
+       function greet(name, age) {
+       	return ("Hello  "+ name +"  You are  " +age+" years old.")
+       	
+       }
+       console.log(greet('Packiarajan', 60))
+
+       function multiply(a,b) {
+       	return(a*b);
+
+       }
+
+       console.log(multiply(4,5));
+
+</script>
+
+
+
+</body>
+</html>

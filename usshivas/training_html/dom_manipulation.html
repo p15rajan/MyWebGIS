@@ -1,0 +1,103 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+	<meta charset="UTF-8">
+	<meta name="viewport" content="width=device-width, initial-scale=1.0">
+	<title>Document</title>
+</head>
+<body>
+ <h2>CHANGE ELEMENT CONTENT</h2>
+ <div>
+ <h3 id='title'>Hello World!</h3> 	
+ <button id="button1" onclick=changeContent()>Change Content</button>
+ </div>
+
+ <br><br><br><br>
+
+ <h2>CHANGE ELEMENT STYLE</h2>
+ <div>
+ <p id='Line1'>This is a Line</p>
+ <button onclick="changeStyle()">Change Style</button>
+
+  </div>
+
+  //APPEND ELEMENTS
+ <div>
+ 	
+ 	<div id="Container1">
+ 		<p>This is a First Line.'</p>
+ 	</div>
+ 		<button onclick="addElement()">Add Element</button>
+
+ </div>
+
+<br><br><br><br><br>	
+
+<div>
+	<p id="removeMe">This Line will be removed</p>
+	<button onclick="removeElement()">Remove Element</button>
+
+</div>
+
+<br><br><br><br><br><br>	
+
+//MODIFYING ATTRIBUTES
+
+<div>	
+<img id="myImage" src="images/image1.jpg" width="400", height="400">
+<button onclick="changeImage()">Change Image</button>
+
+</div>
+
+<br><br><br><br><br><br>
+
+// HANDLING ALERT
+
+<div> 
+	<button id="button_alert">Alert</button>
+</div>
+
+</body>
+</html>
+
+<script>
+	
+//document.getElementById("button1").addEventListener("click", function() {
+//	document.getElementById("title").textContent = "Hello Java Script";
+//});
+
+function changeContent() {
+	document.getElementById("title").innerHTML = "Hello, JavaScript!";
+}
+
+
+function changeStyle() {
+	document.getElementById("Line1").style.color = "red"; 
+	document.getElementById("Line1").style.fontSize = "30px";
+ }
+
+ function addElement(){
+ 	var newElement= document.createElement("p");
+ 	newElement.innerHTML = 'This is a 2nd Line';
+ 	document.getElementById("Container1").appendChild(newElement); 	
+
+ }
+
+ function removeElement() {
+ 	var element = document.getElementById("removeMe");
+ 	element.parentNode.removeChild(element);
+ 	
+ }
+
+ function changeImage() {
+ 	var Image = document.getElementById("myImage");
+ 	Image.src = "images/image5.jpg"
+ 	
+ }
+ 
+ document.getElementById("button_alert").addEventListener("click", function(){
+ 	alert("The Button has been Pressed")
+ } )
+
+
+</script>
